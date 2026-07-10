@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adhd-finance-harness/schemas/accounts.schema.json",
+  "title": "Accounts frontmatter (finance/accounts.md)",
+  "description": "The user's accounts, cards, and envelopes, including the per-account ingestion mapping written by the column-mapping wizard (D3).",
+  "type": "object",
+  "required": ["schema_version", "accounts"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "accounts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "type", "currency"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$"},
+          "name": {"type": "string"},
+          "type": {
+            "enum": ["checking", "credit_card", "envelope", "savings", "investment", "cash"],
+            "description": "envelope = a real or virtual sub-account used as an envelope (e.g. CelBetet-style)."
+          },
+          "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+          "parent": {
+            "type": "string",
+            "description": "Account id this envelope/sub-account belongs to."
+          },
+          "owner": {
+            "type": "string",
+            "description": "Family member or purpose label; display only."
+          },
+          "ingestion": {
+            "type": "object",
+            "description": "Column-mapping wizard output; presence means this account has bank exports to ingest.",
+            "required": ["format", "columns"],
+            "additionalProperties": false,
+            "properties": {
+              "format": {"enum": ["csv", "xlsx"]},
+              "encoding": {"type": "string", "default": "utf-8"},
+              "delimiter": {"type": "string", "default": ";"},
+              "decimal": {"enum": [".", ","], "default": "."},
+              "thousands": {"type": "string"},
+              "date_format": {"type": "string", "description": "strptime pattern, e.g. %Y.%m.%d."},
+              "header_rows": {"type": "integer", "minimum": 0, "default": 1},
+              "sheet": {"type": "string", "description": "XLSX sheet name; first sheet if omitted."},
+              "columns": {
+                "type": "object",
+                "required": ["date", "amount", "description"],
+                "additionalProperties": false,
+                "properties": {
+                  "date": {"type": "string"},
+                  "amount": {"type": "string"},
+                  "description": {"type": "string"},
+                  "counterparty": {"type": "string"},
+                  "balance": {"type": "string"},
+                  "currency": {"type": "string"}
+                },
+                "description": "Values are source column headers (or letters for XLSX)."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adhd-finance-harness/schemas/persona.schema.json",
+  "title": "Persona eval package frontmatter (evals/personas/<id>.md)",
+  "description": "A persona IS a test case (D9): profile for the persona-bot, fixture-generation parameters for synthetic bank exports, and expected outcomes the harness must produce. The markdown body is the persona's first-person story, used as the bot's voice.",
+  "type": "object",
+  "required": ["schema_version", "id", "profile", "accounts", "income", "spending", "fixtures", "expect"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "profile": {
+      "type": "object",
+      "required": ["household"],
+      "additionalProperties": false,
+      "properties": {
+        "age": {"type": "integer", "minimum": 16},
+        "household": {"enum": ["single", "couple", "family"]},
+        "members": {"type": "integer", "minimum": 1},
+        "neurotype": {"type": "string", "description": "e.g. adhd-inattentive, adhd-combined; free text."},
+        "language": {"type": "string", "default": "en"},
+        "occupation": {"type": "string"}
+      }
+    },
+    "accounts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "dialect"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$"},
+          "type": {"enum": ["checking", "credit_card"]},
+          "dialect": {
+            "enum": ["eu_csv", "hu_csv", "simple_xlsx", "revolut_csv", "wise_csv", "monzo_csv", "n26_csv", "otp_xlsx"],
+            "description": "Export dialect preset: eu_csv = UTF-8 ; decimal-comma; hu_csv = Windows-1250 Hungarian headers; simple_xlsx = plain XLSX sheet; revolut_csv/wise_csv/monzo_csv/n26_csv/otp_xlsx = real-bank shapes from the roadmap-B5 survey (synthetic data, authentic layout)."
+          }
+        }
+      }
+    },
+    "income": {
+      "type": "object",
+      "required": ["type", "currency", "amount", "days"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {"enum": ["regular", "irregular"]},
+        "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+        "amount": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "number", "exclusiveMinimum": 0},
+          "description": "[min, max] per payment; equal values = fixed salary."
+        },
+        "days": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "integer", "minimum": 1, "maximum": 28},
+          "description": "Days of month payments arrive; two entries can model two earners. For irregular income, months may randomly skip some of these days."
+        },
+        "employer_desc": {"type": "string", "description": "Transaction description for income rows."}
+      }
+    },
+    "spending": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["category", "freq", "amount", "merchants", "account"],
+        "additionalProperties": false,
+        "properties": {
+          "category": {"type": "string"},
+          "freq": {"enum": ["weekly", "monthly", "sporadic"]},
+          "amount": {
+            "type": "array", "minItems": 2, "maxItems": 2,
+            "items": {"type": "number", "exclusiveMinimum": 0}
+          },
+          "merchants": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "account": {"type": "string", "description": "Account id the spend appears on."},
+          "day": {"type": "integer", "minimum": 1, "maximum": 28, "description": "Fixed day for monthly items (subscriptions)."}
+        }
+      }
+    },
+    "yearly_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "month", "amount", "category", "account"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string"},
+          "month": {"type": "integer", "minimum": 1, "maximum": 12},
+          "amount": {"type": "number", "exclusiveMinimum": 0},
+          "category": {"type": "string"},
+          "account": {"type": "string"}
+        }
+      }
+    },
+    "internal_transfers": {
+      "enum": ["none", "refill_after_spend", "monthly_allocation"],
+      "default": "none",
+      "description": "refill_after_spend = envelope-style pairs (out of checking, into credit card) following card spending; monthly_allocation = one bulk pair after salary."
+    },
+    "quirks": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Behavioral traits for the persona-bot and coaching evals (e.g. forgets_subscriptions, abandons_tracking_after_3_weeks). Not used for data generation."
+    },
+    "fixtures": {
+      "type": "object",
+      "required": ["months"],
+      "additionalProperties": false,
+      "properties": {
+        "months": {"type": "integer", "minimum": 1, "maximum": 60},
+        "end_month": {"type": "string", "pattern": "^\\d{4}-\\d{2}$", "description": "Last generated month; fixed for determinism. Default 2026-06."},
+        "seed": {"type": "integer", "description": "Override the RNG seed (default: derived from persona id)."},
+        "desc_entropy": {"type": "boolean", "default": false, "description": "Append a unique numeric reference to every transaction description (real banks put entropy in the booking-info field; detection must group by counterparty or digit-stripped description)."},
+        "sub_accounts": {"type": "array", "items": {"type": "string"}, "description": "Own sub-account names receiving one-legged transfers from checking (the counterpart leg lives in an export that is never provided — the real-world CelBetet shape). Legs carry a stable OWN ACCOUNT counterparty and an entropy-laden description."},
+        "savings_sweep": {"type": "boolean", "default": false, "description": "Sweep most of each month's checking surplus to an own savings sub-account (one-legged), keeping balances realistic."}
+      }
+    },
+    "expect": {
+      "type": "object",
+      "description": "What the harness MUST get right for this persona — consumed by the eval runner (Step 3).",
+      "additionalProperties": false,
+      "properties": {
+        "onboarding_detects": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Facts onboarding must discover, e.g. salary_days, yearly item ids, refills_not_income."
+        },
+        "mode_suggestion": {"enum": ["awareness", "envelopes", "hybrid"]},
+        "journey": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "adopts_envelope": {"type": "string", "description": "Category adopted during the simulated journey."},
+            "by_month": {"type": "integer", "minimum": 1, "description": "Simulated month index by which adoption should be proposed."}
+          }
+        },
+        "invariants": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Named invariant checks that must hold, e.g. no_double_count, reconciliation_balances."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adhd-finance-harness/schemas/merchant-map.schema.json",
+  "title": "Merchant map frontmatter (finance/knowledge/merchant-map.md)",
+  "description": "Learned meanings of transaction descriptions: who the counterparty is, what category, and whether it is a real expense/income or an internal transfer. Built during onboarding, grown monthly.",
+  "type": "object",
+  "required": ["schema_version", "merchants"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "merchants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pattern", "category", "kind"],
+        "additionalProperties": false,
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "Case-insensitive substring matched against the field selected by 'field' (default: the normalized transaction description)."
+          },
+          "field": {
+            "enum": ["description", "counterparty"],
+            "default": "description",
+            "description": "Which transaction field the pattern matches. counterparty rules are how one-legged internal transfers to own sub-accounts are recognized when descriptions carry per-transaction entropy."
+          },
+          "merchant": {"type": "string", "description": "Human name for the counterparty."},
+          "category": {"type": "string", "description": "Canonical category key."},
+          "kind": {
+            "enum": ["expense", "income", "internal_transfer", "refund"],
+            "description": "internal_transfer entries are candidates for the transfer matcher, never counted as income/expense."
+          },
+          "by": {"enum": ["user", "agent", "rule"], "default": "agent"},
+          "confirmed": {
+            "type": "boolean",
+            "default": false,
+            "description": "True once the user has verified this mapping; unconfirmed mappings are re-surfaced for review."
+          },
+          "learned": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+          "notes": {"type": "string"}
+        }
+      }
+    }
+  }
+}

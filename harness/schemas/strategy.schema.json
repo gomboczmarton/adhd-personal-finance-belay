@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adhd-finance-harness/schemas/strategy.schema.json",
+  "title": "Strategy frontmatter (finance/strategy.md)",
+  "description": "The user's current financial working mode and their journey state. Mode is a starting point, not a lifetime setting (D2a): envelope adoption can be partial and per-category.",
+  "type": "object",
+  "required": ["schema_version", "mode"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "mode": {
+      "enum": ["awareness", "envelopes", "hybrid"],
+      "description": "Overall stance: awareness (shame-free visibility), envelopes (full allocation), hybrid (partial adoption in progress)."
+    },
+    "envelope_adoption": {
+      "type": "object",
+      "description": "Per-category envelope adoption; presence of entries with mode=awareness implies a journey in progress.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["since", "envelope"],
+        "additionalProperties": false,
+        "properties": {
+          "since": {"type": "string", "pattern": "^\\d{4}-\\d{2}$"},
+          "envelope": {"type": "string", "description": "Envelope id from accounts.md this category draws from."}
+        }
+      }
+    },
+    "next_review": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}$",
+      "description": "When the coaching layer should next revisit the mode with the user."
+    },
+    "language": {
+      "type": "string",
+      "description": "BCP-47 tag for user-facing dialogue and reports (D6). Default en.",
+      "default": "en"
+    }
+  }
+}

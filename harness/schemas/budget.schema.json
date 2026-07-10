@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adhd-finance-harness/schemas/budget.schema.json",
+  "title": "Monthly budget frontmatter (finance/months/YYYY-MM/budget.md)",
+  "description": "One month's plan: expected income, envelope allocations (envelope mode), or awareness targets (awareness mode). Arithmetic invariants (allocations vs income) are enforced by scripts, not by this schema.",
+  "type": "object",
+  "required": ["schema_version", "month", "currency"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "month": {"type": "string", "pattern": "^\\d{4}-\\d{2}$"},
+    "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "income_planned": {"type": "number", "minimum": 0},
+    "allocations": {
+      "type": "object",
+      "description": "Envelope id -> planned amount. Present in envelopes/hybrid mode.",
+      "additionalProperties": {"type": "number", "minimum": 0}
+    },
+    "awareness_targets": {
+      "type": "object",
+      "description": "Category key -> soft awareness ceiling (no allocation, no shaming). Present in awareness/hybrid mode.",
+      "additionalProperties": {"type": "number", "minimum": 0}
+    },
+    "overlay": {
+      "type": "array",
+      "description": "Month-specific items beyond the recurring baseline; yearly-bank items land here highlighted at planning time.",
+      "items": {
+        "type": "object",
+        "required": ["name", "amount", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string"},
+          "amount": {"type": "number"},
+          "category": {"type": "string"},
+          "envelope": {"type": "string"},
+          "source": {
+            "enum": ["yearly_bank", "user", "carryover"],
+            "description": "yearly_bank = auto-suggested due item (render highlighted); carryover = from last month's reconciliation."
+          },
+          "yearly_bank_id": {"type": "string"},
+          "done": {"type": "boolean", "default": false}
+        }
+      }
+    },
+    "savings_target": {"type": "number", "minimum": 0}
+  }
+}

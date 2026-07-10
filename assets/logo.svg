@@ -1,0 +1,12 @@
+<svg width="220" height="260" viewBox="0 0 220 260" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Belay logo: a carabiner holding a rope">
+  <!-- carabiner body -->
+  <rect x="55" y="18" width="110" height="188" rx="50" stroke="#2f9e92" stroke-width="16"/>
+  <!-- gate: notch cut into the body, redrawn as the opening arm -->
+  <line x1="156" y1="62" x2="120" y2="118" stroke="#ffffff" stroke-width="26" stroke-linecap="butt" opacity="0"/>
+  <line x1="156" y1="62" x2="120" y2="118" stroke="#2f9e92" stroke-width="11" stroke-linecap="round" transform="translate(6,-4)"/>
+  <!-- rope through the carabiner -->
+  <path d="M 22 158 C 60 126, 160 126, 198 158" stroke="#d98c4f" stroke-width="14" stroke-linecap="round"/>
+  <path d="M 22 158 C 60 126, 160 126, 198 158" stroke="#d98c4f" stroke-width="14" stroke-linecap="round" stroke-dasharray="2 24" opacity="0.35" transform="translate(0,-1)"/>
+  <!-- wordmark -->
+  <text x="110" y="248" text-anchor="middle" font-family="Avenir, 'Segoe UI', system-ui, sans-serif" font-size="40" font-weight="700" letter-spacing="1" fill="#2f9e92">Belay</text>
+</svg>
