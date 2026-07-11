@@ -93,6 +93,8 @@ power the conversation itself. Delete the folder and it's gone.
 
 ## Version
 
+Licensed under the [MIT License](LICENSE).
+
 v0.1.0 — first public cut. Built in a private factory repo where the eval suite,
 personas, and design history live; releases here carry the packaged harness
 (`dist/harness.zip`, also attached to GitHub Releases).

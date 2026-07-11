@@ -1,0 +1,47 @@
+name: Release
+
+# Creates the GitHub Release for the version in VERSION, with the packaged
+# harness zips attached, whenever main changes those inputs (or on manual
+# dispatch). Idempotent: if the release for the current VERSION already
+# exists, the job exits cleanly.
+on:
+  push:
+    branches: [main]
+    paths: [VERSION, dist/**, .github/workflows/release.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(cat VERSION)"
+          TAG="v${VERSION}"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — nothing to do."
+            exit 0
+          fi
+          gh release create "$TAG" \
+            "dist/harness.zip#harness.zip (stable asset for install.py --from-release)" \
+            "dist/harness-v${VERSION}.zip" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Belay $TAG" \
+            --notes "First public cut of Belay — a shame-free personal-finance companion for ADHD brains, built as a Claude Code harness.
+
+**Install** (Python 3.11+, uv, Claude Code):
+\`\`\`bash
+uv run install.py /path/to/your-finance-repo --from-release
+\`\`\`
+or clone this repo and run \`uv run install.py <target>\`.
+
+Contents: 5 skills (onboarding, monthly-prep, reconcile-month, purchase-check, welcome-back), the finance-coach agent, the deterministic script core (10 scripts, Decimal-exact), and 8 JSON schemas. Bank presets: Revolut/Wise/N26/Monzo CSV, OTP netbank XLSX, generic EU/HU shapes.
+
+Licensed under MIT."
