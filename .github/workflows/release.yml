@@ -7,7 +7,10 @@ name: Release
 on:
   push:
     branches: [main]
-    paths: [VERSION, dist/**, .github/workflows/release.yml]
+    paths:
+      - VERSION
+      - "dist/**"
+      - ".github/workflows/release.yml"
   workflow_dispatch:
 
 permissions:
@@ -34,14 +37,4 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Belay $TAG" \
-            --notes "First public cut of Belay — a shame-free personal-finance companion for ADHD brains, built as a Claude Code harness.
-
-**Install** (Python 3.11+, uv, Claude Code):
-\`\`\`bash
-uv run install.py /path/to/your-finance-repo --from-release
-\`\`\`
-or clone this repo and run \`uv run install.py <target>\`.
-
-Contents: 5 skills (onboarding, monthly-prep, reconcile-month, purchase-check, welcome-back), the finance-coach agent, the deterministic script core (10 scripts, Decimal-exact), and 8 JSON schemas. Bank presets: Revolut/Wise/N26/Monzo CSV, OTP netbank XLSX, generic EU/HU shapes.
-
-Licensed under MIT."
+            --notes-file .github/release-notes.md
