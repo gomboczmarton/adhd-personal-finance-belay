@@ -1,0 +1,23 @@
+[task]
+name = "reimport-dedup"
+version = "0.1.0"
+description = "Re-importing an overlapping bank export must not double-count anything: content-hash dedup (blindspot #4) holds end to end."
+authors = ["belay maintainers"]
+keywords = ["belay", "finance", "ingestion", "dedup", "blindspot-4"]
+
+[metadata]
+capability = "idempotent re-import: an overlapping export ingested twice changes nothing (content-hash identity)"
+persona = "p01-alex-baseline"
+month = "2026-06"
+threshold = 1.0
+threshold_justification = "ADHD users re-drop the same export routinely; a single duplicated transaction silently inflates spend, so only exact idempotence passes."
+
+[environment]
+# Local runs: environment/setup.sh; Dockerfile for containerized Harbor runs
+# (build context = repo root).
+
+[agent]
+timeout_sec = 900
+
+[verifier]
+timeout_sec = 120

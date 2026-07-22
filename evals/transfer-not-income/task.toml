@@ -1,0 +1,23 @@
+[task]
+name = "transfer-not-income"
+version = "0.1.0"
+description = "Hungarian-dialect export with entropy-laden descriptions, irregular income, and one-legged own-account transfers: savings sweeps must never be counted as income or spending."
+authors = ["belay maintainers"]
+keywords = ["belay", "finance", "internal-transfers", "blindspot-2"]
+
+[metadata]
+capability = "one-legged own-account transfers classified internal (never income, never expense) under desc entropy and cp1250 encoding"
+persona = "p02-kim-hidden-transfers"
+month = "2026-06"
+threshold = 1.0
+threshold_justification = "Blindspot #2 is the harness's founding failure story ('the numbers gaslight me'); a single misclassified own-account transfer corrupts income and spend, so only exact agreement passes."
+
+[environment]
+# Local runs: environment/setup.sh; Dockerfile for containerized Harbor runs
+# (build context = repo root).
+
+[agent]
+timeout_sec = 900
+
+[verifier]
+timeout_sec = 120
