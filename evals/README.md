@@ -66,18 +66,38 @@ lands, run them N≥5 and track pass rate (pass^k for anything autonomous).
 
 ## Containerized runs (real Harbor)
 
-Each task ships a `Dockerfile` (build context = repo root). With Docker and
-`uv tool install harbor` available:
+Each deterministic task ships a self-contained `environment/Dockerfile`.
+Stage the build contexts first, then run:
 
 ```bash
-harbor run --path evals --include-task-name <task-id> --agent <adapter> \
-  --env docker --jobs-dir evals/jobs
+bash evals/prepare_containers.sh   # stages environment/ctx/ per task (git-ignored)
+harbor run -p evals -i "*reconcile*" -i "*transfer*" -i "*reimport*" \
+  -a oracle --env docker --jobs-dir evals/jobs
 ```
 
-The local runner exists because these evals must also run where Docker isn't
-available; it preserves Harbor's phase semantics (setup / solve / test,
-`reward.txt`, infrastructure-error vs reward-0 distinction) so tasks stay
-portable.
+The `oracle` agent executes each task's `solution/solve.sh` in the container —
+a full infrastructure check (build → agent → verifier → reward). Swap in a
+real agent (e.g. `-a claude-code`) to evaluate the conversational layer.
+Verified: all three tasks score 1.0 under Harbor 0.20 with the oracle agent.
+
+### Full Harbor in Claude Code cloud containers
+
+The Claude Code on the web container image ships `dockerd`/`containerd`/`runc`
+but does not start the Docker daemon. The SessionStart hook
+(`.claude/hooks/session-start.sh`, registered in `.claude/settings.json`)
+starts the daemon and installs the Harbor CLI on session start, so full
+containerized runs work out of the box. Two environment facts it accounts for:
+
+- **TLS interception.** Outbound HTTPS from inside task containers is
+  transparently intercepted by the session proxy; downloads fail certificate
+  verification unless the proxy CA is trusted. `prepare_containers.sh` stages
+  `/root/.ccr/ca-bundle.crt` into each build context and the Dockerfiles
+  append it to the system trust store (never disable TLS verification).
+  Keep verifiers network-free regardless — that's better eval hygiene anyway.
+- **Degradation path.** If the daemon can't start (or locally without
+  Docker), `evals/run_local.py` preserves Harbor's phase semantics
+  (setup / solve / test, `reward.txt`, infrastructure-error vs reward-0)
+  so the suite still gates changes.
 
 ## Known limitations / next evals
 
