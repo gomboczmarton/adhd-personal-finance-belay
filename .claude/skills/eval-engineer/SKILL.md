@@ -123,6 +123,23 @@ obstacle, state, or failure mode — not just new names).
   iteration goes in the target repo's `experiments.md` lab notebook
   (`practices/06`).
 
+## Runtime installation (Claude cloud sessions)
+
+If the target repo will run Harbor evals in Claude Code cloud sessions,
+install the runtime on day zero — the remote container ships dockerd but does
+not start it, and the Harbor CLI is absent:
+
+1. Copy `assets/session-start.sh` → target `.claude/hooks/session-start.sh`
+   (`chmod +x`) and merge `assets/settings.json` into the target's
+   `.claude/settings.json`.
+2. Adapt `assets/prepare_containers.sh` (set `STAGE_PATHS`) so each task's
+   Docker build context is self-contained; git-ignore
+   `evals/*/environment/ctx/` and `evals/jobs/`.
+3. Read [references/claude-cloud-containers.md](references/claude-cloud-containers.md)
+   BEFORE the first `harbor run` — it records the TLS-interception fix, the
+   Harbor 0.20 task.toml gotchas (silently dropped on validation failure), and
+   the hook validation commands. All field-verified.
+
 ## Invariants
 
 - One capability per task under `evals/`.
