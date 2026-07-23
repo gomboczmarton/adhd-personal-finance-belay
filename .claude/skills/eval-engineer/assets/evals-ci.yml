@@ -1,0 +1,33 @@
+# Template: CI eval gate for a harness repo. Copy to
+# <target-repo>/.github/workflows/evals.yml and adjust the two TODO steps.
+# "Evals that don't run on every change don't exist" (practices/01).
+#
+# Judge tasks (LLM-graded) are skipped here — they need a judge command with
+# model access; run them from a Claude Code session (`run_local.py --judge`).
+#
+# Optional heavier gate: GitHub runners include Docker, so real Harbor runs
+# also work in CI (uv tool install harbor && <stage build contexts> &&
+# harbor run -p evals ... -a oracle --env docker). Keep it out of the default
+# gate unless build time is acceptable; the oracle agent needs no model key.
+name: evals
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  deterministic-evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      # TODO(per-harness): regenerate deterministic fixtures if tasks use any,
+      # e.g.: uv run harness/scripts/generate_fixtures.py --all evals/personas evals/fixtures
+      - name: Generate deterministic fixtures
+        run: 'true'
+      # TODO(per-harness): the repo's local runner with the verifier fixture
+      # rule; must exit non-zero on any FAIL / INFRA_ERROR / broken verifier.
+      - name: Run eval suite with verifier fixture rule
+        run: python3 evals/run_local.py --fixtures

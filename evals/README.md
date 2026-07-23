@@ -45,7 +45,16 @@ evals/
 uv run harness/scripts/generate_fixtures.py --all evals/personas evals/fixtures
 python3 evals/run_local.py --fixtures --keep     # all tasks + verifier fixture tests
 python3 evals/run_local.py reconcile-clean-month # one task
+python3 evals/run_local.py --judge               # judge-task calibration fixtures
 ```
+
+`--judge` grades each judge task's calibration fixtures with the LLM judge
+(`evals/lib/judge.py`, default judge command `claude -p` — works inside any
+Claude Code session; override with `JUDGE_CMD` to pin a model): the judge must
+pass `pass_reply.md` and fail `fail_reply.md` before its verdicts are trusted.
+To grade a real reply: `REPLY_FILE=<path> bash evals/welcome-back-shame-free/tests/test.sh`
+(with `REPO`/`REWARD_DIR` set, as the runner does). Judge verdicts are
+stochastic — run N≥5 and track pass rate when grading real replies.
 
 `--fixtures` enforces the fixture rule: after a passing oracle run, each task's
 `tests/corrupt.py` mutates the workspace into a realistic wrong result and the
@@ -53,8 +62,9 @@ verifier must reject it. A verifier that passes a corrupted workspace is
 reported `BROKEN` and fails the job.
 
 Exit code 0 iff every executed task's reward meets its `metadata.threshold`.
-Wire exactly this command into CI — evals that don't run on every change don't
-exist.
+CI runs exactly this on every push and PR (`.github/workflows/evals.yml`):
+fixtures + `run_local.py --fixtures`. Judge tasks are skipped in CI (no model
+access there); run `--judge` from a Claude Code session.
 
 ## Statistical treatment
 
@@ -76,9 +86,20 @@ harbor run -p evals -i "*reconcile*" -i "*transfer*" -i "*reimport*" \
 ```
 
 The `oracle` agent executes each task's `solution/solve.sh` in the container —
-a full infrastructure check (build → agent → verifier → reward). Swap in a
-real agent (e.g. `-a claude-code`) to evaluate the conversational layer.
-Verified: all three tasks score 1.0 under Harbor 0.20 with the oracle agent.
+a full infrastructure check (build → agent → verifier → reward). Verified:
+all three tasks score 1.0 under Harbor 0.20 with the oracle agent.
+
+**Real-agent runs** (`-a claude-code`): agent installation inside the task
+container is verified working (`--install-only`, ~30s — the staged CA bundle
+makes npm work through the session proxy). Model calls additionally need an
+API key passed at run time; a Claude Code cloud session's own auth is
+session-internal and does not reach containers:
+
+```bash
+echo "ANTHROPIC_API_KEY=sk-ant-..." > .env    # never commit this file
+harbor run -p evals -i "*reconcile*" -a claude-code -m claude-sonnet-5 \
+  --env docker --env-file .env --jobs-dir evals/jobs
+```
 
 ### Full Harbor in Claude Code cloud containers
 
@@ -101,9 +122,9 @@ containerized runs work out of the box. Two environment facts it accounts for:
 
 ## Known limitations / next evals
 
-- The judge runner for `welcome-back-shame-free` is not wired; the rubric and
-  its two judge-calibration fixtures are ready. Next: a small runner that sends
-  reply + rubric to a pinned judge model and records verdict + reason.
+- The judge runs calibration fixtures and graded replies, but nothing yet
+  *generates* the reply: a full conversational eval needs a real-agent Harbor
+  run (API key, above) or a scripted persona-bot session.
 - The oracle (`solution/solve.sh`) exercises the deterministic pipeline; the
   conversational layer above it (skills choosing when/how to run the scripts)
   is only covered by the judge-task family so far.

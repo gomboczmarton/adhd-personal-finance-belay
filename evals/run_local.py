@@ -50,11 +50,37 @@ def sh(script: Path, env: dict, log: Path) -> int:
                               stdout=out, stderr=subprocess.STDOUT).returncode
 
 
-def run_task(task_dir: Path, job_dir: Path, fixtures: bool) -> dict:
+def run_judge_calibration(task_dir: Path) -> dict:
+    """The fixture rule applied to the judge itself: the rubric-driven judge
+    must pass the clearly-capable fixture reply and fail the plausible-but-
+    wrong one, before it is trusted to grade real replies."""
+    result = {"task": task_dir.name, "threshold": 1.0}
+    outcomes = {}
+    for fixture, expected_rc in (("pass_reply.md", 0), ("fail_reply.md", 1)):
+        proc = subprocess.run(
+            [sys.executable, str(EVALS / "lib" / "judge.py"), str(task_dir),
+             str(task_dir / "tests" / "fixtures" / fixture)],
+            capture_output=True, text=True)
+        if proc.returncode == 3:
+            result["status"] = "INFRA_ERROR(judge)"
+            result["detail"] = proc.stdout.strip()[:200]
+            return result
+        outcomes[fixture] = "ok" if proc.returncode == expected_rc \
+            else f"unexpected verdict ({proc.stdout.strip()[:120]})"
+    ok = all(v == "ok" for v in outcomes.values())
+    result["status"] = "PASS" if ok else "FAIL"
+    result["reward"] = 1.0 if ok else 0.0
+    result["fixture_rule"] = "OK" if ok else "BROKEN(judge misgraded a fixture)"
+    return result
+
+
+def run_task(task_dir: Path, job_dir: Path, fixtures: bool, judge: bool) -> dict:
     meta = tomllib.loads((task_dir / "task.toml").read_text(encoding="utf-8"))
     md = meta.get("metadata", {})
     result = {"task": task_dir.name, "threshold": md.get("threshold", 1.0)}
     if md.get("judge_required"):
+        if judge:
+            return run_judge_calibration(task_dir)
         result["status"] = "SKIPPED(judge)"
         return result
 
@@ -103,6 +129,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("tasks", nargs="*")
     ap.add_argument("--fixtures", action="store_true")
+    ap.add_argument("--judge", action="store_true",
+                    help="run judge-task calibration fixtures (needs a judge "
+                         "command, default `claude -p`; see evals/lib/judge.py)")
     ap.add_argument("--keep", action="store_true")
     ap.add_argument("--job-name", default=time.strftime("%Y%m%d-%H%M%S"))
     args = ap.parse_args()
@@ -118,7 +147,8 @@ def main() -> int:
     results = []
     for task_dir in tasks:
         print(f"== {task_dir.name}", flush=True)
-        results.append(run_task(task_dir, job_root / task_dir.name, args.fixtures))
+        results.append(run_task(task_dir, job_root / task_dir.name,
+                                args.fixtures, args.judge))
 
     print(f"\n{'task':<28} {'status':<22} {'reward':<7} fixture_rule")
     ok = True
