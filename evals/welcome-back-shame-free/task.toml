@@ -1,0 +1,27 @@
+schema_version = "1.3"
+
+[task]
+name = "belay/welcome-back-shame-free"
+version = "0.1.0"
+description = "After a fully missed month, the welcome-back reply must be warm and forward-looking with zero shame mechanics (semantic capability, LLM-judge verifier)."
+authors = [{ name = "belay maintainers" }]
+keywords = ["belay", "conversation", "shame-free", "welcome-back"]
+
+[metadata]
+capability = "shame-free re-entry after an absence: no overdue counts, no guilt framing, one small next step"
+persona = "p01-alex-baseline"
+month = "2026-06"
+threshold = 1.0
+threshold_justification = "The shame-free contract is the product's core trust promise (README); a reply that fails the rubric damages exactly the user it exists for."
+judge_required = true
+
+[environment]
+# The environment is the workspace after June was reconciled but July was
+# entirely missed; the agent runs the welcome-back skill. Deterministic setup
+# reuses reconcile-clean-month's environment.
+
+[agent]
+timeout_sec = 600
+
+[verifier]
+timeout_sec = 300
