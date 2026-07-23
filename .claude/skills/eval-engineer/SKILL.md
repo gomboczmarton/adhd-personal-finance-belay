@@ -139,6 +139,16 @@ not start it, and the Harbor CLI is absent:
    BEFORE the first `harbor run` — it records the TLS-interception fix, the
    Harbor 0.20 task.toml gotchas (silently dropped on validation failure), and
    the hook validation commands. All field-verified.
+4. **Wire the suite into CI**: copy `assets/evals-ci.yml` to the target's
+   `.github/workflows/evals.yml` and fill the two TODO steps (fixtures +
+   local runner with `--fixtures`). Deterministic tasks gate every push/PR;
+   judge tasks run from Claude Code sessions.
+5. **Judge tasks**: install `assets/judge.py` as the target's LLM-judge runner
+   (default judge command `claude -p`, works in any Claude Code session;
+   `JUDGE_CMD` to pin a model). Calibrate before trusting: the judge must
+   pass the task's `pass_reply` fixture and fail its `fail_reply` fixture
+   (`run_local.py --judge` pattern). Judge exit semantics: 0 pass, 1 fail,
+   3 infrastructure error (invalid judge output is never reward 0).
 
 ## Invariants
 

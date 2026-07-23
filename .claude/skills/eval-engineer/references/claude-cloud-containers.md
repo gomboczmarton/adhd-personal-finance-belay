@@ -76,6 +76,48 @@ per run into a git-ignored `ctx/`.
 - The scaffold's default `tests/test.sh` downloads `uv` at verify time — it
   hits the TLS wall above. Replace it with a network-free verifier.
 
+## LLM judge in cloud sessions (field-verified 2026-07-23)
+
+The session's `claude` CLI authenticates via a session-internal OAuth file
+descriptor — no exportable `ANTHROPIC_API_KEY` exists. Consequences:
+
+- **In-session judging works with zero setup**: `claude -p` inherits the
+  session auth, so `assets/judge.py` (rubric + reply → strict JSON verdict)
+  runs anywhere Claude Code runs. Verified: a shame-free-rubric judge
+  correctly passed the capable fixture and failed the plausible-wrong one.
+- **Calibrate before trusting** (the fixture rule applied to the grader):
+  every judge task ships a `pass_reply` and `fail_reply` fixture; the judge
+  must grade both correctly before its verdicts count. Judge verdicts are
+  stochastic — N≥5 with pass rates when grading real replies.
+- Judge failure semantics: invalid/missing judge output is an infrastructure
+  error (exit 3), never reward 0.
+
+## Real-agent runs inside task containers (field-verified 2026-07-23)
+
+- `harbor run -a claude-code --install-only` **succeeds** in a cloud-session
+  Docker daemon: the agent installs inside the task container in ~30s (npm
+  reaches the registry because the staged CA bundle makes the proxy's TLS
+  interception verifiable).
+- **Model calls need a real API key at run time** — the session's OAuth does
+  not reach containers. Pass it explicitly and never commit it:
+
+  ```bash
+  echo "ANTHROPIC_API_KEY=sk-ant-..." > .env   # git-ignored
+  harbor run -p evals -i "<task-glob>" -a claude-code -m <model> \
+    --env docker --env-file .env --jobs-dir evals/jobs
+  ```
+- Cost ordering: oracle runs (free, infrastructure proof) → deterministic
+  suite in CI (free) → judge calibration (cheap) → real-agent Harbor runs
+  (metered; smallest task set that answers the question).
+
+## CI wiring (generic gate)
+
+`assets/evals-ci.yml` is the copyable GitHub Actions gate: fixtures + the
+repo's local runner with `--fixtures` on every push/PR — deterministic tasks
+and the verifier fixture rule, no model access needed. GitHub runners include
+Docker, so a heavier optional job can run real Harbor with the oracle agent
+(still no model key). Judge tasks stay out of CI; run them from a session.
+
 ## Degradation path
 
 Docker unavailable (hook prints the warning) → the repo's local runner

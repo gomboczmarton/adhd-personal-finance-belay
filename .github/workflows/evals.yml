@@ -1,0 +1,29 @@
+# Eval gate: every push and PR runs the deterministic eval suite with the
+# verifier fixture rule. "Evals that don't run on every change don't exist."
+#
+# Judge tasks (LLM-graded) are skipped here — they need a judge command with
+# model access; run them in a Claude Code session via:
+#   python3 evals/run_local.py --judge
+#
+# Optional heavier gate: GitHub runners include Docker, so real Harbor runs
+# also work in CI (uv tool install harbor && bash evals/prepare_containers.sh
+# && harbor run -p evals ... -a oracle --env docker). Kept out of the default
+# gate for speed.
+name: evals
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  deterministic-evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Generate deterministic fixtures
+        run: uv run harness/scripts/generate_fixtures.py --all evals/personas evals/fixtures
+      - name: Run eval suite with verifier fixture rule
+        run: python3 evals/run_local.py --fixtures
