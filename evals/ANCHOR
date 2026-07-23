@@ -1,0 +1,7 @@
+# Frozen anchor sub-suite (practices/06: never optimized against).
+# These tasks are EXCLUDED from PR CI and run only in the release workflow.
+# Changing this list or the anchored tasks is a release-time, owner-approved
+# act — recorded in docs/decisions.md. Chosen for breadth: family volume +
+# yearly items (p05) and multi-dialect ingestion (p06).
+family-yearly-items
+multibank-dialect-dedup

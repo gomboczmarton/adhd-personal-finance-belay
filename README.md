@@ -98,3 +98,19 @@ Licensed under the [MIT License](LICENSE).
 v0.1.0 — first public cut. Built in a private factory repo where the eval suite,
 personas, and design history live; releases here carry the packaged harness
 (`dist/harness.zip`, also attached to GitHub Releases).
+
+## Your instance: private copy, never a fork
+
+Belay is a template you copy, not a repo you fork: use GitHub's **Use this
+template**, or clone and push to a **new private repository**. Never use the
+Fork button — forks of public repos cannot be made private, and your instance
+will contain your financial data and personal tailoring.
+
+Your instance has two kinds of paths: **harness-owned** (`.claude/skills/` of
+shipped skills, `harness/scripts/`, `harness/schemas/` — overwritten when you
+upgrade by re-running `install.py`) and **yours** (`finance/`, any
+`*-local` additions — never touched by upgrades). Belay's meta layer can build
+you new flows on request; each one ships with its own checks and tests, and
+nothing is adopted without your approval. To offer a flow you built back to
+the community, open an issue — personal data never leaves your instance (see
+CONTRIBUTING.md).

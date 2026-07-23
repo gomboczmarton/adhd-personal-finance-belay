@@ -1,6 +1,6 @@
 ---
 name: eval-engineer
-description: Build, run, and audit evals for an agentic harness — interactively, one Harbor task at a time (the default, LangChain-style workflow), or route to a Darwin-style evolution loop when its preconditions hold. Use when the user asks to create evals, an eval suite, benchmark/regression tasks, test scenarios for a harness, verifier design, trace-informed evals, or asks which eval approach to use, or wants to optimize/evolve a harness against its evals. Complements harness-designer (day-zero eval system) and harness-auditor (eval gap audit) by doing the eval authoring itself.
+description: Build, run, and audit evals for an agentic harness — interactively, one Harbor task at a time (the default, LangChain-style workflow), or route to a Darwin-style evolution loop when its preconditions hold. Use when the user asks to create evals, an eval suite, benchmark/regression tasks, test scenarios for a harness, verifier design, trace-informed evals, or asks which eval approach to use, or wants to optimize/evolve a harness against its evals. Complements harness-designer (day-zero eval system) and harness-auditor (eval gap audit) by doing the eval authoring itself. ONLY on an explicit engineering request — never during finance flows (onboarding, reconciling, budgeting, purchase checks, welcome-back): those are the domain plane; this skill is the meta plane (docs/architecture.md activation planes).
 ---
 
 # Eval Engineer

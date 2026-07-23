@@ -1,0 +1,25 @@
+schema_version = "1.3"
+
+[task]
+name = "belay/feast-famine-income"
+version = "0.1.0"
+description = "Reconcile an irregular-income freelancer month exactly: feast-or-famine pay recognized as income, subscription spread categorized, nothing smoothed."
+authors = [{ name = "belay maintainers" }]
+keywords = ["belay", "finance", "irregular-income"]
+
+[metadata]
+capability = "irregular income handled without smoothing: per-month income exact under feast-or-famine variance; 7 subscription merchants categorized (migrated persona: sam-freelancer)"
+persona = "p07-sam-freelancer"
+month = "2026-06"
+threshold = 1.0
+threshold_justification = "Deterministic pipeline over synthetic fixtures with known ground truth; any numeric mismatch is a harness defect, so nothing below exact agreement is acceptable."
+
+[environment]
+# Local runs: environment/setup.sh builds the workspace (see evals/README.md).
+# The Dockerfile reproduces the same environment for containerized Harbor runs.
+
+[agent]
+timeout_sec = 1800
+
+[verifier]
+timeout_sec = 240

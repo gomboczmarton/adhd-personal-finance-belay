@@ -133,10 +133,19 @@ def main() -> int:
                     help="run judge-task calibration fixtures (needs a judge "
                          "command, default `claude -p`; see evals/lib/judge.py)")
     ap.add_argument("--keep", action="store_true")
+    ap.add_argument("--exclude-anchor", action="store_true",
+                    help="skip the frozen anchor sub-suite listed in evals/ANCHOR "
+                         "(the PR-CI mode; the release workflow runs everything)")
     ap.add_argument("--job-name", default=time.strftime("%Y%m%d-%H%M%S"))
     args = ap.parse_args()
 
     tasks = discover()
+    if args.exclude_anchor:
+        anchor_file = EVALS / "ANCHOR"
+        anchored = {l.strip() for l in anchor_file.read_text().splitlines()
+                    if l.strip() and not l.startswith("#")} if anchor_file.exists() else set()
+        tasks = [t for t in tasks if t.name not in anchored]
+        print(f"anchor excluded: {', '.join(sorted(anchored)) or '(none)'}")
     if args.tasks:
         tasks = [t for t in tasks if t.name in args.tasks]
         missing = set(args.tasks) - {t.name for t in tasks}
