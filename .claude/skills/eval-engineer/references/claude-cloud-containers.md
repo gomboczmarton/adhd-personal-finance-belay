@@ -110,6 +110,26 @@ descriptor — no exportable `ANTHROPIC_API_KEY` exists. Consequences:
   suite in CI (free) → judge calibration (cheap) → real-agent Harbor runs
   (metered; smallest task set that answers the question).
 
+### Solving the API key (three options, in order of preference)
+
+| Option | Credential | Billing | Where to store it |
+|---|---|---|---|
+| **A. Console API key** (recommended) | `ANTHROPIC_API_KEY` from console.anthropic.com — use a dedicated workspace with a **monthly spend cap**, one named key per harness | API pay-per-token | Claude Code environment settings (env var) for cloud sessions; GitHub repo secret for CI; git-ignored `.env` locally |
+| **B. Subscription OAuth token** | `CLAUDE_CODE_OAUTH_TOKEN` from `claude setup-token` (run locally, interactive) | Uses the Claude plan's limits | Same three stores. Authenticates the `claude` CLI specifically — covers the `claude-code` Harbor agent and `judge.py`; revoke per-token |
+| **C. Bedrock / Vertex** | IAM credentials + `CLAUDE_CODE_USE_BEDROCK=1` (or Vertex equivalent) | Cloud account | Enterprise setups only |
+
+Rules that hold in every option:
+
+- The key exists only in an environment/CI secret store or a git-ignored
+  `.env` generated at run time (`echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" > .env`)
+  — never in a Dockerfile, task file, fixture, or commit. Harbor's contract:
+  credentials by env-var reference only.
+- In CI, gate real-agent jobs behind `workflow_dispatch` (manual trigger);
+  the free oracle/deterministic gate is the per-push check.
+- The cloud session's own login can never be reused: its OAuth lives in a
+  session-scoped file descriptor and does not reach task containers — by
+  design, not a limitation to work around.
+
 ## CI wiring (generic gate)
 
 `assets/evals-ci.yml` is the copyable GitHub Actions gate: fixtures + the

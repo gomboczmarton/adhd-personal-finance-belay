@@ -96,10 +96,20 @@ API key passed at run time; a Claude Code cloud session's own auth is
 session-internal and does not reach containers:
 
 ```bash
-echo "ANTHROPIC_API_KEY=sk-ant-..." > .env    # never commit this file
+echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" > .env   # git-ignored, generated at run time
 harbor run -p evals -i "*reconcile*" -a claude-code -m claude-sonnet-5 \
   --env docker --env-file .env --jobs-dir evals/jobs
 ```
+
+Getting the key (full comparison in the skill's
+`references/claude-cloud-containers.md`): **A.** Console API key from a
+spend-capped workspace (recommended) — store as an env var in the Claude Code
+environment settings, a GitHub repo secret, or a local git-ignored `.env`;
+**B.** subscription OAuth token via `claude setup-token`
+(`CLAUDE_CODE_OAUTH_TOKEN`, runs on plan limits); **C.** Bedrock/Vertex for
+enterprise accounts. Never in a Dockerfile, task file, fixture, or commit;
+in CI, gate real-agent jobs behind `workflow_dispatch` — the free
+oracle/deterministic gate remains the per-push check.
 
 ### Full Harbor in Claude Code cloud containers
 
