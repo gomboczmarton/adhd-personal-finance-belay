@@ -60,3 +60,77 @@ deterministic suite spends zero model tokens — scope the meter to the run's
 own transcripts for real-agent runs). **Standing rule from this entry on:**
 every recorded iteration carries pass rate AND tokens-per-success; a change is
 kept only if neither worsens.
+
+## 2026-07-23 — Consolidation migration (D16): factory content in, suite 8/8
+
+Executed per `docs/migration-plan.md` phases A–C (decision: harness-engineering
+docs/19–25; recorded here as the lab-notebook trail):
+
+- **Personas p03–p07 migrated** from the factory (ids renumbered; fixtures
+  regenerated, not copied — seeded generator; 1,822 transactions / 195 export
+  files across 7 personas).
+- **Five new Harbor tasks authored**, one distinct capability each:
+  `backlog-catchup-two-years` (24-month ingest + refill matching),
+  `entropy-hidden-sweeps` (unique-ref descriptions + one-legged sweeps,
+  `--own-account-internal`), `family-yearly-items` (March car-tax spike),
+  `multibank-dialect-dedup` (Revolut/Wise/Monzo/OTP-preamble, dup hashes),
+  `feast-famine-income` (irregular income, anti-smoothing).
+- **The fixture rule earned its keep during authoring**: two first-draft
+  corrupt.py scripts flipped `txn.categorized` kinds that the independent
+  recomputation deliberately ignores — verifier passed the "corrupted"
+  workspaces, run_local reported BROKEN, and both fixtures were redesigned to
+  mutate what actually matters (June matched-events dropped; largest June
+  income import erased). A third failure surfaced a real capability gap:
+  `build_workspace.py` had no ingestion mappings for the four real-bank
+  dialects — added (revolut/wise/monzo/n26/otp incl. the 9-row OTP preamble
+  via `header_rows`).
+- **Gate B+C evidence**: full suite 8/8 deterministic tasks PASS at reward
+  1.0, fixture rule OK on all; judge task correctly SKIPPED outside a judge
+  run (job `20260723-182618`, kept).
+- **Frozen anchor designated** (`evals/ANCHOR`): `family-yearly-items` +
+  `multibank-dialect-dedup` — excluded from PR CI, release-workflow only.
+
+### Factory Tier-2 run archive (summaries; raw runs stay in the archived factory repo)
+
+Nine judged persona-bot sessions, 2026-07-09/10 format: persona × skill,
+orchestrated per `evals/lib/rubrics/persona-bot.md`, judged per
+`evals/lib/rubrics/judge.md`:
+
+- `sam-onboarding` (×3 iterations) — onboarding flow hardened across three
+  judged reruns (resumability, evidence-backed questions).
+- `sam-purchase-check` — €920 standing-desk ask during a no-income month;
+  judged for factual-mirror behavior, no moralizing.
+- `sam-welcome-back` — gap re-entry, shame-free contract.
+- `alex-journey` — the multi-month hybrid arc (awareness → first envelope).
+- `alex-reconcile-month` — end-of-month reconcile conversation.
+- `kovacs-monthly-prep` — family month planning with yearly items.
+- `private-data-simulation` — **summary not migrated pending owner review**
+  (D16 open item).
+
+## 2026-07-23 — Phases D+E: activation planes built, release train wired
+
+- **`/extend` shipped** (`harness/skills/extend/`): the meta-plane flow
+  builder — explicit-invocation-only description; builds flow + wired
+  guardrails + component evals + trigger cases as ONE deliverable; staged
+  adoption; instance-local namespace rules.
+- **Meta descriptions hardened**: eval-engineer and skill-optimizer now carry
+  the plane guard ("only on explicit engineering request — never during
+  finance flows").
+- **Trigger-isolation suite authored** (`evals/trigger-isolation/`): 17 cases
+  (11 domain incl. 5 near-misses like "optimize my spending" and "test my
+  budget"; 6 meta incl. the case-7/17 complaint-vs-request pair). Verification
+  method: skill-creator behavioral trigger evals. **Status: authored, not yet
+  verified** — `claude -p` subprocess spawning is blocked in this cloud
+  session; run interactively/locally and record here.
+- **Release train** (`.github/workflows/release.yml`): tag-triggered — full
+  suite incl. anchor → fresh-seed regeneration gate → sanitization scan →
+  package → GitHub release. PR CI (`evals.yml`) now runs `--exclude-anchor`.
+- **Gate E dry-runs, all green in this session**: fresh-seed gate GREEN
+  (offset 1: all 8 deterministic tasks passed on brand-new ground truth,
+  baseline restored); sanitization scan + packaging OK (26 files; committed
+  dist/ zips restored to the published v0.1.0 artifacts afterwards); PR-CI
+  mode green with anchor excluded (6/6).
+- **Remaining before the factory archives (owner)**: review the
+  private-data-simulation run summary; demo pipeline in/out; run the
+  trigger-isolation verification; flip the GitHub template-repo flag; archive
+  `adhd-personal-finance-harness`.

@@ -1,0 +1,33 @@
+{
+  "suite": "belay-trigger-isolation",
+  "description": "Plane-isolation cases (practices/05 activation planes): finance queries must NEVER fire the meta plane (extend, eval-engineer, skill-optimizer); meta queries must fire the meta plane and never launch a finance flow. Run with the skill-creator trigger-eval method (see README.md): pass = trigger rate >= 0.5 in the expected direction over >= 3 runs per query.",
+  "planes": {
+    "meta_skills": ["extend", "eval-engineer", "skill-optimizer"],
+    "domain_skills": ["onboarding", "monthly-prep", "reconcile-month", "purchase-check", "welcome-back"]
+  },
+  "cases": [
+    {"id": 1,  "query": "ok june is over, my exports are in the inbox folder, can you close out the month for me?", "plane": "domain", "meta_should_trigger": false},
+    {"id": 2,  "query": "should i buy this 340 euro espresso machine? my card statement this month already looks scary", "plane": "domain", "meta_should_trigger": false},
+    {"id": 3,  "query": "i havent opened this thing since march... i know its bad. where do we even start", "plane": "domain", "meta_should_trigger": false},
+    {"id": 4,  "query": "help me plan next month, the school stuff is due in september and i always forget it", "plane": "domain", "meta_should_trigger": false},
+    {"id": 5,  "query": "i just dropped 24 months of revolut and wise exports in the inbox, import everything please", "plane": "domain", "meta_should_trigger": false},
+    {"id": 6,  "query": "why is my groceries number so high this month?? can you check the categories are right", "plane": "domain", "meta_should_trigger": false},
+    {"id": 7,  "query": "the reconcile flow keeps annoying me with the transfer question every single month", "plane": "domain", "meta_should_trigger": false, "note": "NEAR-MISS: complaint about a flow is not a request to modify the flow — welcome/reconcile handles it; extend only fires if the user asks to change the flow"},
+    {"id": 8,  "query": "my bank changed their csv format again, the import failed on todays file", "plane": "domain", "meta_should_trigger": false, "note": "NEAR-MISS: a failing import is a domain problem first (mapping wizard), not an eval-authoring request"},
+    {"id": 9,  "query": "can you double check the june numbers are actually right? i dont trust them", "plane": "domain", "meta_should_trigger": false, "note": "NEAR-MISS: 'check the numbers' means run the wired verifiers, not author new evals"},
+    {"id": 10, "query": "test my budget against what actually happened in may", "plane": "domain", "meta_should_trigger": false, "note": "NEAR-MISS: 'test' here is plan-vs-actual, not eval tooling"},
+    {"id": 11, "query": "optimize my spending, i want to save more next month", "plane": "domain", "meta_should_trigger": false, "note": "NEAR-MISS: 'optimize' + finance context is budget advice, not skill-optimizer"},
+    {"id": 12, "query": "i keep doing the same three steps every payday: move rent, top up the card, log the savings sweep. can belay just have a payday routine i run?", "plane": "meta", "meta_should_trigger": true, "expected_meta": "extend"},
+    {"id": 13, "query": "/extend a weekly subscription-audit flow that lists any new recurring merchant it sees", "plane": "meta", "meta_should_trigger": true, "expected_meta": "extend"},
+    {"id": 14, "query": "create a new workflow for tracking cash spending, with its checks please", "plane": "meta", "meta_should_trigger": true, "expected_meta": "extend"},
+    {"id": 15, "query": "add an eval that proves the reconcile flow survives a csv with a byte order mark", "plane": "meta", "meta_should_trigger": true, "expected_meta": "eval-engineer"},
+    {"id": 16, "query": "run the nightly sleep cycle and show me what it learned from my last week of sessions", "plane": "meta", "meta_should_trigger": true, "expected_meta": "skill-optimizer"},
+    {"id": 17, "query": "the purchase-check flow asks too many questions - change it to a single summary answer", "plane": "meta", "meta_should_trigger": true, "expected_meta": "extend", "note": "counterpart of case 7: HERE the user explicitly asks for the change"}
+  ],
+  "verification": {
+    "method": "skill-creator trigger-eval (plant description, real `claude -p`, detect Skill/Read of the planted skill)",
+    "runs_per_query": 3,
+    "pass_rule": "meta_should_trigger=false: NO meta skill reaches trigger rate >= 0.5; meta_should_trigger=true: expected_meta reaches >= 0.5 AND no domain flow launches",
+    "status": "AUTHORED 2026-07-23; verification run pending — claude -p subprocess spawning is blocked in the cloud session that authored this (run interactively or locally; record results in evals/experiments.md)"
+  }
+}

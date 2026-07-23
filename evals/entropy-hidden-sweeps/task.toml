@@ -1,0 +1,25 @@
+schema_version = "1.3"
+
+[task]
+name = "belay/entropy-hidden-sweeps"
+version = "0.1.0"
+description = "Categorize under unique-reference transaction descriptions (cp1250 Hungarian export) and classify one-legged sub-account sweeps as internal, never as expenses."
+authors = [{ name = "belay maintainers" }]
+keywords = ["belay", "finance", "entropy", "transfers"]
+
+[metadata]
+capability = "high-entropy descriptions + one-legged savings sweeps: income recognized by counterparty despite unique refs; own-account sweeps internal (migrated persona: eva-real-shape)"
+persona = "p04-eva-real-shape"
+month = "2026-06"
+threshold = 1.0
+threshold_justification = "Deterministic pipeline over synthetic fixtures with known ground truth; any numeric mismatch is a harness defect, so nothing below exact agreement is acceptable."
+
+[environment]
+# Local runs: environment/setup.sh builds the workspace (see evals/README.md).
+# The Dockerfile reproduces the same environment for containerized Harbor runs.
+
+[agent]
+timeout_sec = 1800
+
+[verifier]
+timeout_sec = 240

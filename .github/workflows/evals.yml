@@ -5,6 +5,10 @@
 # model access; run them in a Claude Code session via:
 #   python3 evals/run_local.py --judge
 #
+# The frozen anchor sub-suite (evals/ANCHOR) and the fresh-seed regeneration
+# gate run ONLY in the release workflow (release.yml) — do not tune against
+# them (practices/06 gate discipline).
+#
 # Optional heavier gate: GitHub runners include Docker, so real Harbor runs
 # also work in CI (uv tool install harbor && bash evals/prepare_containers.sh
 # && harbor run -p evals ... -a oracle --env docker). Kept out of the default
@@ -25,5 +29,5 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - name: Generate deterministic fixtures
         run: uv run harness/scripts/generate_fixtures.py --all evals/personas evals/fixtures
-      - name: Run eval suite with verifier fixture rule
-        run: python3 evals/run_local.py --fixtures
+      - name: Run eval suite with verifier fixture rule (anchor excluded)
+        run: python3 evals/run_local.py --fixtures --exclude-anchor

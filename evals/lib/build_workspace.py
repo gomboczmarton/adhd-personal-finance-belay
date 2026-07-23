@@ -43,6 +43,36 @@ INGESTION = {
         "format": "xlsx", "date_format": "%Y-%m-%d",
         "columns": {"date": "Date", "amount": "Amount", "description": "Merchant"},
     },
+    # Real-bank dialects (roadmap-B5 shapes; column names match generate_fixtures.py)
+    "revolut_csv": {
+        "format": "csv", "encoding": "utf-8", "delimiter": ",", "decimal": ".",
+        "date_format": "%Y-%m-%d %H:%M:%S", "header_rows": 1,
+        "columns": {"date": "Completed Date", "amount": "Amount",
+                    "description": "Description"},
+    },
+    "wise_csv": {
+        "format": "csv", "encoding": "utf-8", "delimiter": ",", "decimal": ".",
+        "date_format": "%d-%m-%Y", "header_rows": 1,
+        "columns": {"date": "Date", "amount": "Amount",
+                    "description": "Description", "counterparty": "Merchant"},
+    },
+    "monzo_csv": {
+        "format": "csv", "encoding": "utf-8", "delimiter": ",", "decimal": ".",
+        "date_format": "%d/%m/%Y", "header_rows": 1,
+        "columns": {"date": "Date", "amount": "Amount",
+                    "description": "Description", "counterparty": "Name"},
+    },
+    "n26_csv": {
+        "format": "csv", "encoding": "utf-8", "delimiter": ",", "decimal": ".",
+        "date_format": "%Y-%m-%d", "header_rows": 1,
+        "columns": {"date": "Booking Date", "amount": "Amount (EUR)",
+                    "description": "Payment Reference", "counterparty": "Partner Name"},
+    },
+    "otp_xlsx": {
+        "format": "xlsx", "date_format": "%Y-%m-%d", "header_rows": 10,
+        "columns": {"date": "Könyvelés dátuma", "amount": "Összeg",
+                    "description": "Közlemény", "counterparty": "Ellenoldali név"},
+    },
 }
 
 

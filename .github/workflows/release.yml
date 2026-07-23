@@ -1,40 +1,38 @@
-name: Release
+# Release train (D16): tags are releases. Runs the gates PR CI deliberately
+# does not — the frozen anchor sub-suite and the fresh-seed regeneration gate
+# (structural anti-overfitting: brand-new ground truth per release) — then the
+# sanitization scan + packaging, and publishes dist/harness.zip.
+name: release
 
-# Creates the GitHub Release for the version in VERSION, with the packaged
-# harness zips attached, whenever main changes those inputs (or on manual
-# dispatch). Idempotent: if the release for the current VERSION already
-# exists, the job exits cleanly.
 on:
   push:
-    branches: [main]
-    paths:
-      - VERSION
-      - "dist/**"
-      - ".github/workflows/release.yml"
-  workflow_dispatch:
+    tags: ["v*"]
 
 permissions:
   contents: write
 
 jobs:
-  release:
+  gate-and-package:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Create release if missing
+      - uses: astral-sh/setup-uv@v5
+      - name: Baseline fixtures + FULL suite (anchor included)
+        run: |
+          uv run harness/scripts/generate_fixtures.py --all evals/personas evals/fixtures
+          python3 evals/run_local.py --fixtures
+      - name: Fresh-seed regeneration gate
+        run: python3 tools/fresh_seed_gate.py --offset ${{ github.run_number }}
+      - name: Sanitization scan + package
+        run: uv run tools/package_release.py --version "${GITHUB_REF_NAME#v}"
+      - name: Publish GitHub release with harness.zip
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION="$(cat VERSION)"
-          TAG="v${VERSION}"
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $TAG already exists — nothing to do."
-            exit 0
-          fi
-          gh release create "$TAG" \
-            "dist/harness.zip#harness.zip (stable asset for install.py --from-release)" \
-            "dist/harness-v${VERSION}.zip" \
-            --repo "$GITHUB_REPOSITORY" \
-            --target "$GITHUB_SHA" \
-            --title "Belay $TAG" \
-            --notes-file .github/release-notes.md
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Belay $GITHUB_REF_NAME" \
+            --generate-notes \
+            dist/harness.zip "dist/harness-${GITHUB_REF_NAME#v}.zip" || \
+          gh release upload "$GITHUB_REF_NAME" \
+            dist/harness.zip "dist/harness-${GITHUB_REF_NAME#v}.zip" --clobber
