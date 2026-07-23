@@ -1,3 +1,4 @@
 evals/jobs/
 evals/fixtures/
 evals/*/environment/ctx/
+.env
