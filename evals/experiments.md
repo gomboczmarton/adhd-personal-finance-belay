@@ -47,3 +47,16 @@ proposal is adopted only after this repo's deterministic suite re-runs green;
 regression ⇒ restore from the engine's backup. Next step (interactive session or
 local machine): first real night via handoff or claude backend with
 `--max-tasks 3 --edit-budget 2`, then record the night here.
+
+## 2026-07-23 — token_meter.py installed (tokens-per-success signal)
+
+Per the store's `practices/08` §"Closing the loop": installed
+`.claude/skills/eval-engineer/assets/token_meter.py` and verified the full
+pipeline — suite run with `--keep` (3/3 PASS), then
+`token_meter.py ~/.claude/projects/<slug> --rewards evals/jobs/<job>` joined
+transcript usage with the reward files and emitted `tokens_per_success`
+(demo run: 3 successes; the token side covered the whole session, since the
+deterministic suite spends zero model tokens — scope the meter to the run's
+own transcripts for real-agent runs). **Standing rule from this entry on:**
+every recorded iteration carries pass rate AND tokens-per-success; a change is
+kept only if neither worsens.
