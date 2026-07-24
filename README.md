@@ -53,6 +53,7 @@ Requirements: Python 3.11+, [uv](https://docs.astral.sh/uv/),
 | `/purchase-check` | "Should I buy this?" — a 30-second factual impact picture. You decide; Belay is the mirror, not the parent. |
 | `/welcome-back` | Been away? The whole gap summarized in five lines and a fresh start. |
 | `finance-coach` agent | The journey layer: pattern reflections, small reversible experiments, goal check-ins. |
+| `/extend` | Belay grows around you: describe a flow you wish existed and Belay builds it — **with its own checks and tests, in the same act**. See "Belay builds its own flows" below. |
 
 Bank formats with built-in auto-detection: Revolut, Wise, N26, Monzo CSV; OTP
 netbank XLSX; generic EU / Hungarian CSV shapes. Anything else goes through the
@@ -70,6 +71,36 @@ interactive mapping wizard once and is remembered.
   like. (All data is synthetic by construction — no real person's finances appear
   anywhere in this repository.)
 
+## Belay builds its own flows — `/extend`
+
+Belay is not a fixed menu. Tell it about a routine you keep repeating ("every
+payday I move rent, top up the card, log the savings sweep — can that just be
+one command?") and `/extend` builds the flow. What makes this safe rather than
+scary is the iron rule the whole system runs on: **no flow without
+evaluation** — a new flow, its wired-in checks, and its tests are one
+deliverable, created together, and nothing becomes active until you approve it.
+
+```mermaid
+flowchart LR
+    ask["You describe the flow<br/>AND what 'good' looks like<br/>(the goodness criteria)"]
+    build["Belay drafts the flow<br/>steps call the deterministic<br/>scripts - the model never<br/>does the math"]
+    wire["Guardrails wired IN:<br/>every state-changing step<br/>ends by invoking its check"]
+    evals["Custom evals authored<br/>in the same act:<br/>verifier vs known ground truth<br/>+ a wrong-result fixture<br/>the verifier must reject<br/>+ trigger tests"]
+    stage["Staged for YOUR approval:<br/>flow + checks + eval results<br/>shown before anything activates"]
+
+    ask --> build --> wire --> evals --> stage
+    stage -->|"approved: lives in YOUR namespace,<br/>survives upgrades"| done["your personal flow"]
+    stage -->|"not right yet"| ask
+```
+
+The same discipline covers the flow's *triggering*: `/extend` adds test
+phrases proving your new flow fires when you'd naturally ask for it — and
+that Belay's engineering tools never wake up during money conversations
+("optimize my spending" gets budget coaching, not a systems process). The
+full design is in [`docs/architecture.md`](docs/architecture.md); a flow that
+proves great in your instance can be offered back to the community
+(anonymized — see [`CONTRIBUTING.md`](CONTRIBUTING.md)).
+
 ## Why you can trust the numbers
 
 - **The model never does arithmetic.** All money math — parsing, dedup, transfer
@@ -80,10 +111,16 @@ interactive mapping wizard once and is remembered.
   envelope-style banking.
 - **Re-importing is always safe.** Content-hash dedup means overlapping exports add
   zero duplicates, ever.
-- **Tested like software, and like a conversation.** The engine ships with a
-  deterministic eval suite (five synthetic personas, ground-truth manifests,
-  40 checks green), and the conversational behavior is evaluated with persona-bot
-  sessions judged against a shame-free rubric before any skill changes ship.
+- **Tested like software, and like a conversation.** The full eval suite lives
+  in this repo and gates every change: **seven synthetic personas** (from a
+  clean baseline to a four-bank multibanker and a feast-or-famine freelancer)
+  with seeded generators and ground-truth manifests, **nine Harbor-format
+  tasks** whose verifiers independently recompute every number — and every
+  verifier must first reject a plausible-but-wrong result before it's trusted.
+  Conversational behavior is judged against a shame-free rubric. Releases
+  additionally pass a **fresh-seed gate**: all fixtures are regenerated with
+  new seeds and the suite must stay green on ground truth nobody has seen —
+  memorized answers can't pass it.
 
 ## Your data stays yours
 
@@ -95,9 +132,14 @@ power the conversation itself. Delete the folder and it's gone.
 
 Licensed under the [MIT License](LICENSE).
 
-v0.1.0 — first public cut. Built in a private factory repo where the eval suite,
-personas, and design history live; releases here carry the packaged harness
-(`dist/harness.zip`, also attached to GitHub Releases).
+v0.1.0 — first public cut. Since the D16 consolidation this repo is the whole
+project: the harness, its full eval suite, its design history
+([`docs/decisions.md`](docs/decisions.md)), and its build machinery live here
+together — engineering tools cleanly separated from your money conversations
+by tested activation planes ([`docs/architecture.md`](docs/architecture.md)).
+Releases are git tags: the release workflow re-proves the full suite, runs the
+fresh-seed gate and a sanitization scan, then publishes the packaged harness
+(`dist/harness.zip` on GitHub Releases, consumed by `install.py --from-release`).
 
 ## Your instance: private copy, never a fork
 
