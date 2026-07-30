@@ -71,6 +71,78 @@ interactive mapping wizard once and is remembered.
   like. (All data is synthetic by construction — no real person's finances appear
   anywhere in this repository.)
 
+## See it in motion — one user's first month, recorded
+
+Six real, recorded Claude Code sessions in one continuous workspace, played as
+the synthetic persona **Alex** (24 months of exports, two accounts, a card
+refilled from checking — the classic setup every finance app miscounts). In
+order, they are the way Belay is meant to be lived: onboard once, then the
+monthly rhythm. Model wait-time is compressed in the GIFs; the raw asciinema
+casts and the findings the demo surfaced are in
+[`examples/demo-sessions/`](examples/demo-sessions/).
+
+### 1 · `/onboarding` — exports in, workspace out
+
+Belay finds the exports on its own, auto-detects one bank dialect and sniffs
+the other, matches all 96 card-refill pairs (not income!), surfaces a
+subscription Alex thought was cancelled, recommends awareness mode **by rule**
+(no envelope structure in the data → no imposed structure), and computes the
+buffer goal from history instead of asking Alex to guess. It also catches a
+mid-month planning pitfall and writes the workspace memory (`CLAUDE.md` +
+`finance/strategy.md`) that later sessions visibly build on.
+
+![Onboarding session](examples/demo-sessions/01-onboarding/session.gif)
+
+### 2 · `/welcome-back` — the make-or-break re-entry
+
+Alex returns guilty ("didn't open it once, July is basically over"). The first
+sentence is warm; the gap is restated as fact — "July is just… not in the
+system. Not a missed thing, just an empty one." One small door is offered, and
+when Alex takes the exit instead, that's treated as a full, correct outcome.
+**The win is that you came back.**
+
+![Welcome-back session](examples/demo-sessions/02-welcome-back/session.gif)
+
+### 3 · `/reconcile-month` — July closed in one turn
+
+Exports dropped in, month closed: 18 transactions auto-categorized from the
+merchant map, the €420 annual car insurance recognized on sight (flagged since
+onboarding), and Alex's accidentally re-downloaded overlapping statements
+deduped — 427 duplicate rows skipped, zero double-counting. Letter, HTML
+report, and Excel written; overspend, had there been any, is information, not
+failure.
+
+![Reconcile-month session](examples/demo-sessions/03-reconcile-month/session.gif)
+
+### 4 · `/monthly-prep` — August planned, averages protected
+
+The draft refreshes every target from the newest three months — except where
+that would lie: July's insurance spike would have tripled the car target
+(€214 instead of €73), so it's excluded from the rolling average, with the
+reasoning shown. One open question ("anything unusual this month?") turns a
+€200 coast trip into a user-sourced overlay line that won't skew future
+baselines.
+
+![Monthly-prep session](examples/demo-sessions/04-monthly-prep/session.gif)
+
+### 5 · `/purchase-check` — the mirror, not the parent
+
+"€340 espresso machine, should I?" Four factual lines: July's actual surplus,
+August's drafted surplus, the buffer-goal effect — then options, no verdict.
+Alex chooses to wait ("knowing it fits kills half the urge") and the *decision*
+is logged as a win worth remembering.
+
+![Purchase-check session](examples/demo-sessions/05-purchase-check/session.gif)
+
+### 6 · `finance-coach` — the journey layer
+
+A check-in, not a report: one theme, evidence instead of adjectives, the logged
+espresso win reflected back, the zombie subscription gently resurfaced — and,
+correctly, **nothing proposed**, because one clean month is not yet a pattern.
+The next touchpoint is named and the session ends warm.
+
+![Finance-coach session](examples/demo-sessions/06-coach-checkin/session.gif)
+
 ## Belay builds its own flows — `/extend`
 
 Belay is not a fixed menu. Tell it about a routine you keep repeating ("every
