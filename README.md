@@ -53,6 +53,7 @@ Requirements: Python 3.11+, [uv](https://docs.astral.sh/uv/),
 | `/purchase-check` | "Should I buy this?" — a 30-second factual impact picture. You decide; Belay is the mirror, not the parent. |
 | `/welcome-back` | Been away? The whole gap summarized in five lines and a fresh start. |
 | `finance-coach` agent | The journey layer: pattern reflections, small reversible experiments, goal check-ins. |
+| `/extend` | Belay grows around you: describe a flow you wish existed and Belay builds it — **with its own checks and tests, in the same act**. See "Belay builds its own flows" below. |
 
 Bank formats with built-in auto-detection: Revolut, Wise, N26, Monzo CSV; OTP
 netbank XLSX; generic EU / Hungarian CSV shapes. Anything else goes through the
@@ -70,6 +71,108 @@ interactive mapping wizard once and is remembered.
   like. (All data is synthetic by construction — no real person's finances appear
   anywhere in this repository.)
 
+## See it in motion — one user's first month, recorded
+
+Six real, recorded Claude Code sessions in one continuous workspace, played as
+the synthetic persona **Alex** (24 months of exports, two accounts, a card
+refilled from checking — the classic setup every finance app miscounts). In
+order, they are the way Belay is meant to be lived: onboard once, then the
+monthly rhythm. Model wait-time is compressed in the GIFs; the raw asciinema
+casts and the findings the demo surfaced are in
+[`examples/demo-sessions/`](examples/demo-sessions/).
+
+### 1 · `/onboarding` — exports in, workspace out
+
+Belay finds the exports on its own, auto-detects one bank dialect and sniffs
+the other, matches all 96 card-refill pairs (not income!), surfaces a
+subscription Alex thought was cancelled, recommends awareness mode **by rule**
+(no envelope structure in the data → no imposed structure), and computes the
+buffer goal from history instead of asking Alex to guess. It also catches a
+mid-month planning pitfall and writes the workspace memory (`CLAUDE.md` +
+`finance/strategy.md`) that later sessions visibly build on.
+
+![Onboarding session](examples/demo-sessions/01-onboarding/session.gif)
+
+### 2 · `/welcome-back` — the make-or-break re-entry
+
+Alex returns guilty ("didn't open it once, July is basically over"). The first
+sentence is warm; the gap is restated as fact — "July is just… not in the
+system. Not a missed thing, just an empty one." One small door is offered, and
+when Alex takes the exit instead, that's treated as a full, correct outcome.
+**The win is that you came back.**
+
+![Welcome-back session](examples/demo-sessions/02-welcome-back/session.gif)
+
+### 3 · `/reconcile-month` — July closed in one turn
+
+Exports dropped in, month closed: 18 transactions auto-categorized from the
+merchant map, the €420 annual car insurance recognized on sight (flagged since
+onboarding), and Alex's accidentally re-downloaded overlapping statements
+deduped — 427 duplicate rows skipped, zero double-counting. Letter, HTML
+report, and Excel written; overspend, had there been any, is information, not
+failure.
+
+![Reconcile-month session](examples/demo-sessions/03-reconcile-month/session.gif)
+
+### 4 · `/monthly-prep` — August planned, averages protected
+
+The draft refreshes every target from the newest three months — except where
+that would lie: July's insurance spike would have tripled the car target
+(€214 instead of €73), so it's excluded from the rolling average, with the
+reasoning shown. One open question ("anything unusual this month?") turns a
+€200 coast trip into a user-sourced overlay line that won't skew future
+baselines.
+
+![Monthly-prep session](examples/demo-sessions/04-monthly-prep/session.gif)
+
+### 5 · `/purchase-check` — the mirror, not the parent
+
+"€340 espresso machine, should I?" Four factual lines: July's actual surplus,
+August's drafted surplus, the buffer-goal effect — then options, no verdict.
+Alex chooses to wait ("knowing it fits kills half the urge") and the *decision*
+is logged as a win worth remembering.
+
+![Purchase-check session](examples/demo-sessions/05-purchase-check/session.gif)
+
+### 6 · `finance-coach` — the journey layer
+
+A check-in, not a report: one theme, evidence instead of adjectives, the logged
+espresso win reflected back, the zombie subscription gently resurfaced — and,
+correctly, **nothing proposed**, because one clean month is not yet a pattern.
+The next touchpoint is named and the session ends warm.
+
+![Finance-coach session](examples/demo-sessions/06-coach-checkin/session.gif)
+
+## Belay builds its own flows — `/extend`
+
+Belay is not a fixed menu. Tell it about a routine you keep repeating ("every
+payday I move rent, top up the card, log the savings sweep — can that just be
+one command?") and `/extend` builds the flow. What makes this safe rather than
+scary is the iron rule the whole system runs on: **no flow without
+evaluation** — a new flow, its wired-in checks, and its tests are one
+deliverable, created together, and nothing becomes active until you approve it.
+
+```mermaid
+flowchart LR
+    ask["You describe the flow<br/>AND what 'good' looks like<br/>(the goodness criteria)"]
+    build["Belay drafts the flow<br/>steps call the deterministic<br/>scripts - the model never<br/>does the math"]
+    wire["Guardrails wired IN:<br/>every state-changing step<br/>ends by invoking its check"]
+    evals["Custom evals authored<br/>in the same act:<br/>verifier vs known ground truth<br/>+ a wrong-result fixture<br/>the verifier must reject<br/>+ trigger tests"]
+    stage["Staged for YOUR approval:<br/>flow + checks + eval results<br/>shown before anything activates"]
+
+    ask --> build --> wire --> evals --> stage
+    stage -->|"approved: lives in YOUR namespace,<br/>survives upgrades"| done["your personal flow"]
+    stage -->|"not right yet"| ask
+```
+
+The same discipline covers the flow's *triggering*: `/extend` adds test
+phrases proving your new flow fires when you'd naturally ask for it — and
+that Belay's engineering tools never wake up during money conversations
+("optimize my spending" gets budget coaching, not a systems process). The
+full design is in [`docs/architecture.md`](docs/architecture.md); a flow that
+proves great in your instance can be offered back to the community
+(anonymized — see [`CONTRIBUTING.md`](CONTRIBUTING.md)).
+
 ## Why you can trust the numbers
 
 - **The model never does arithmetic.** All money math — parsing, dedup, transfer
@@ -80,10 +183,16 @@ interactive mapping wizard once and is remembered.
   envelope-style banking.
 - **Re-importing is always safe.** Content-hash dedup means overlapping exports add
   zero duplicates, ever.
-- **Tested like software, and like a conversation.** The engine ships with a
-  deterministic eval suite (five synthetic personas, ground-truth manifests,
-  40 checks green), and the conversational behavior is evaluated with persona-bot
-  sessions judged against a shame-free rubric before any skill changes ship.
+- **Tested like software, and like a conversation.** The full eval suite lives
+  in this repo and gates every change: **seven synthetic personas** (from a
+  clean baseline to a four-bank multibanker and a feast-or-famine freelancer)
+  with seeded generators and ground-truth manifests, **nine Harbor-format
+  tasks** whose verifiers independently recompute every number — and every
+  verifier must first reject a plausible-but-wrong result before it's trusted.
+  Conversational behavior is judged against a shame-free rubric. Releases
+  additionally pass a **fresh-seed gate**: all fixtures are regenerated with
+  new seeds and the suite must stay green on ground truth nobody has seen —
+  memorized answers can't pass it.
 
 ## Your data stays yours
 
@@ -95,9 +204,14 @@ power the conversation itself. Delete the folder and it's gone.
 
 Licensed under the [MIT License](LICENSE).
 
-v0.1.0 — first public cut. Built in a private factory repo where the eval suite,
-personas, and design history live; releases here carry the packaged harness
-(`dist/harness.zip`, also attached to GitHub Releases).
+v0.1.0 — first public cut. Since the D16 consolidation this repo is the whole
+project: the harness, its full eval suite, its design history
+([`docs/decisions.md`](docs/decisions.md)), and its build machinery live here
+together — engineering tools cleanly separated from your money conversations
+by tested activation planes ([`docs/architecture.md`](docs/architecture.md)).
+Releases are git tags: the release workflow re-proves the full suite, runs the
+fresh-seed gate and a sanitization scan, then publishes the packaged harness
+(`dist/harness.zip` on GitHub Releases, consumed by `install.py --from-release`).
 
 ## Your instance: private copy, never a fork
 
