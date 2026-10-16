@@ -1,0 +1,25 @@
+schema_version = "1.3"
+
+[task]
+name = "belay/rhythm-status-display"
+version = "0.1.0"
+description = "Produce the view-model and status line Belay's displays read, for three dates: in rhythm, one month to close, and back after a long gap."
+authors = [{ name = "belay maintainers" }]
+keywords = ["belay", "display", "view-model", "tone", "welcome-back"]
+
+[metadata]
+capability = "display view-model: status.py reads the workspace, displays render it; figures equal the reconcile report and budget exactly, ambient lines carry no amounts, welcome-back carries no count (D4, D2a, welcome-back iron rules)"
+persona = "p01-alex-baseline"
+month = "2026-06"
+threshold = 1.0
+threshold_justification = "Deterministic script over a workspace built by the harness's own pipeline; a figure that differs from the report, an amount in an ambient line or a backlog count on return is a defect, so nothing below exact agreement is acceptable."
+
+[environment]
+# Local runs: environment/setup.sh builds the workspace (see evals/README.md).
+# The Dockerfile reproduces it for containerized Harbor runs (context = repo root).
+
+[agent]
+timeout_sec = 600
+
+[verifier]
+timeout_sec = 120

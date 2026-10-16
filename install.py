@@ -11,8 +11,13 @@ Usage:
     uv run install.py <target-repo-dir> --from-zip <path>  # from a packaged zip
 
 Copies into <target>:
-    .claude/skills/<skill>/   from harness/skills/   (conversational layer)
+    .claude/skills/<skill>/   from harness/skills/   (conversational layer; also
+                              belay-ui, the terminal mod, which loads once
+                              the folder is trusted)
     .claude/agents/<agent>.md from harness/agents/   (subagents)
+    .claude/settings.json     keys of harness/settings.json (status line,
+                              spinner verbs, tips), ADDED only where absent:
+                              a key the user already set is never overwritten
     harness/scripts/*.py      the deterministic core (harness-owned, overwritten
     harness/schemas/*.json    on reinstall/upgrade)
     finance/inbox/            drop zone for bank exports (created empty)
@@ -52,6 +57,24 @@ def source_from_zip(zip_path: Path, workdir: Path) -> Path:
         if (c / "harness" / "scripts").is_dir():
             return c
     sys.exit(f"error: {zip_path} does not contain a harness/ tree")
+
+
+def merge_settings(fragment: Path, dest: Path) -> list[str]:
+    """Add the display layer's settings keys the user has not set.
+
+    Add-only: an existing key (the user's own status line, say) wins and
+    nothing else in their settings is touched. Returns the keys added.
+    """
+    if not fragment.is_file():
+        return []
+    ours = json.loads(fragment.read_text(encoding="utf-8"))
+    theirs = json.loads(dest.read_text(encoding="utf-8")) if dest.is_file() else {}
+    added = [k for k in ours if k not in theirs]
+    if added:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps({**theirs, **{k: ours[k] for k in added}},
+                                   indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return added
 
 
 def main() -> int:
@@ -105,6 +128,9 @@ def main() -> int:
             if f.is_file():
                 shutil.copy2(f, dest / f.name)
                 installed[key].append(f.name)
+
+    installed["settings"] = merge_settings(src / "harness" / "settings.json",
+                                           target / ".claude" / "settings.json")
 
     (target / "finance" / "inbox").mkdir(parents=True, exist_ok=True)
 

@@ -10,7 +10,7 @@ Usage:
 Builds dist/harness-v<version>.zip and dist/harness.zip (stable asset name for
 `install.py --from-release`) containing ONLY the shippable whitelist:
     harness/skills/  harness/agents/  harness/scripts/  harness/schemas/
-    install.py  VERSION
+    install.py  VERSION  harness/settings.json
 
 Sanitization gate (iron rule #2, enforced by a script, not by care): every
 packaged text file is scanned for patterns that should never exist in this
@@ -30,7 +30,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 WHITELIST = ["harness/skills", "harness/agents", "harness/scripts", "harness/schemas"]
-FILES = ["install.py", "VERSION"]
+FILES = ["install.py", "VERSION", "harness/settings.json"]
 
 FORBIDDEN = [
     (re.compile(r"\b\d{6}\*+\d{3,4}\b"), "masked card number shape"),
@@ -62,7 +62,9 @@ def collect() -> list[Path]:
         if not base.is_dir():
             sys.exit(f"error: missing shippable dir {rel}")
         files += [p for p in sorted(base.rglob("*")) if p.is_file()
-                  and "__pycache__" not in p.parts and not p.name.endswith(".pyc")]
+                  and "__pycache__" not in p.parts and not p.name.endswith(".pyc")
+                  # type declarations Claude Code writes beside a loaded mod
+                  and ".claude-plugin/types" not in p.as_posix()]
     for rel in FILES:
         p = ROOT / rel
         if not p.is_file():

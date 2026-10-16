@@ -1,0 +1,7 @@
+{
+  "name": "belay-ui",
+  "version": "0.1.0",
+  "description": "Belay's terminal surface: a rhythm band above the prompt (no amounts, ever), a /belay month view with meters, a quiet receipt after the scripts run. Every number comes from harness/scripts/status.py; the display does no math.",
+  "author": { "name": "Belay" },
+  "types": "./types/index.d.ts"
+}
