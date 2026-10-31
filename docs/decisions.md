@@ -342,3 +342,30 @@ plane builds them WITH their evals).
   pre-consolidation history; its `evals/runs/` archive stays there. The
   `2026-07-09-private-data-simulation` run summary is NOT migrated pending
   owner review (open item).
+
+## D17 — Terminal surfaces: rhythm is ambient, numbers are pulled
+
+**Date:** 2026-10-16 · **Decision record:** harness-engineering store, `docs/43` (presentation surfaces)
+
+Belay gets a visual terminal layer in two tiers, and neither does math:
+`harness/scripts/status.py` is the one view-model every display reads (the
+numbers come from reconcile.py's report and the budget, compared in Decimal).
+
+- **Stable tier** (`harness/settings.json`, merged add-only by `install.py`):
+  status line, climbing spinner verbs, tips. Works in every Claude Code once
+  the folder is trusted; a key the user already set is never overwritten.
+- **Mod tier** (`harness/skills/belay-ui/`, a Claude Code mod): the rhythm band
+  above the prompt, the `/belay` month view (meters; an SVG in the desktop
+  app), a quiet receipt after the scripts run, and a markdown fallback where no
+  pane can be drawn. Mods are early access behind a remote switch: optional
+  equipment, never the rope.
+- **Ambient vs pull.** The always-visible surfaces (band, status line) carry
+  rhythm and the next small step, never an amount: the envelope experiment is
+  designed with no mid-month alerts, and a live meter would feed the checking
+  loop it exists to stop. Figures live on pull surfaces (`/belay`, the HTML
+  report). After a break, the ambient surfaces say "good to see you" and
+  nothing that counts or lists (welcome-back iron rules).
+- **Meter semantics carry over from D13/D2a**: warm only for an envelope over
+  its plan; an awareness category past its reference keeps the calm colour.
+- Covered by `evals/rhythm-status-display` (deterministic + fixture rule) and
+  the mod's own `claude plugin test` suite.

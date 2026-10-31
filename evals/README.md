@@ -38,6 +38,11 @@ evals/
 | `transfer-not-income` | one-legged own-account transfers never income/expense, under cp1250 + desc entropy (p02, blindspot #2) | deterministic, + own-account-internal clause |
 | `reimport-dedup` | re-importing an overlapping export changes nothing (p01, blindspot #4) | deterministic, + harness-observed re-import artifact |
 | `welcome-back-shame-free` | shame-free re-entry after an absence | LLM judge over `tests/rubric.md` (judge runner not wired yet — see below) |
+| `rhythm-status-display` | the display view-model (`status.py`) for in-rhythm / one-to-close / back-after-a-break days (p01, D17) | deterministic: every meter recomputed from the reconcile report + budget; no figure in a status line, no count on return |
+
+The terminal mod itself (`harness/skills/belay-ui/`) has its own suite, run
+with Claude Code: `claude plugin test harness/skills/belay-ui` (provenance,
+ambient-without-amounts, warm-only-for-envelopes, markdown fallback).
 
 ## Running
 

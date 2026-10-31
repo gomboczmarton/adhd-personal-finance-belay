@@ -1,0 +1,28 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "uv run --quiet harness/scripts/status.py finance --line",
+    "padding": 0
+  },
+  "spinnerVerbs": {
+    "mode": "replace",
+    "verbs": [
+      "Holding the rope",
+      "Checking the knot",
+      "Clipping in",
+      "Reading the route",
+      "Coiling",
+      "Chalking up"
+    ]
+  },
+  "spinnerTipsOverride": {
+    "excludeDefault": true,
+    "tips": [
+      "/purchase-check — a quick, factual picture before a buy; you decide",
+      "/belay — the month at a glance, numbers straight from the scripts",
+      "Been away? /welcome-back is a five-minute catch-up. Coming back is the win.",
+      "Overspend is information, not failure",
+      "Every number comes from harness/scripts — never from mental arithmetic"
+    ]
+  }
+}

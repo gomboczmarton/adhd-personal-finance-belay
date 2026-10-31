@@ -54,6 +54,7 @@ Requirements: Python 3.11+, [uv](https://docs.astral.sh/uv/),
 | `/welcome-back` | Been away? The whole gap summarized in five lines and a fresh start. |
 | `finance-coach` agent | The journey layer: pattern reflections, small reversible experiments, goal check-ins. |
 | `/extend` | Belay grows around you: describe a flow you wish existed and Belay builds it — **with its own checks and tests, in the same act**. See "Belay builds its own flows" below. |
+| Terminal surface | A status line (`◉ Belay · October · plan ✓ · next /purchase-check`), climbing spinner verbs and tips — plus, where Claude Code's mods are on, a rhythm band above the prompt and `/belay`, the month at a glance. The always-visible parts never show an amount, and after a break they only say *good to see you*. Numbers live in `/belay`, straight from the scripts. |
 
 Bank formats with built-in auto-detection: Revolut, Wise, N26, Monzo CSV; OTP
 netbank XLSX; generic EU / Hungarian CSV shapes. Anything else goes through the
