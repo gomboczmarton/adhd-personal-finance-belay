@@ -200,6 +200,18 @@ Everything lives in *your* repo: readable markdown plus an append-only ledger un
 `finance/`. Nothing is uploaded anywhere except through the Claude API calls that
 power the conversation itself. Delete the folder and it's gone.
 
+## Sister project: Kockás Füzet
+
+Belay has a Hungarian sibling built on the same foundation:
+[Kockás Füzet](https://github.com/gomboczmarton/kockas-fuzet), a family-budget
+notebook whose first step is a copy-paste recipe for any AI chat. Same rules,
+different lives. The differences at a glance, with the question each one
+answers:
+
+[![Kockás Füzet or Belay? A comparison with typical user questions](assets/kockas-fuzet-vs-belay.svg)](docs/comparison.md)
+
+The same as a table: [`docs/comparison.md`](docs/comparison.md).
+
 ## Version
 
 Licensed under the [MIT License](LICENSE).
