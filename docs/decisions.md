@@ -357,8 +357,10 @@ numbers come from reconcile.py's report and the budget, compared in Decimal).
 - **Mod tier** (`harness/skills/belay-ui/`, a Claude Code mod): the rhythm band
   above the prompt, the `/belay` month view (meters; an SVG in the desktop
   app), a quiet receipt after the scripts run, and a markdown fallback where no
-  pane can be drawn. Mods are early access behind a remote switch: optional
-  equipment, never the rope.
+  pane can be drawn, or when `/belay` is asked from a phone or claude.ai over
+  Remote Control (mods do not draw there; the pane would open in the machine's
+  terminal). Mods can be switched off remotely: optional equipment, never the
+  rope.
 - **Ambient vs pull.** The always-visible surfaces (band, status line) carry
   rhythm and the next small step, never an amount: the envelope experiment is
   designed with no mid-month alerts, and a live meter would feed the checking
