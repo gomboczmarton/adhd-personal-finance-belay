@@ -64,10 +64,15 @@ export const register: Register = on => {
     return next(e)
   })
 
-  on('command.run', { command: 'belay' }, async $ => {
+  on('command.run', { command: 'belay' }, async ($, e) => {
     const s = await refresh($)
     const { isPlaced } = await $.ui.open({ id: PANE, title: 'Belay' })
-    return isPlaced ? { text: 'Month view opened.' } : { text: s ? paneMarkdown(s) : SOURCE_LINE }
+    // Text where nothing draws, and when asked from a phone or claude.ai over Remote
+    // Control: the pane would open in the machine's terminal, which nobody is watching
+    const fromBridge = e.origin.kind === 'bridge'
+    return isPlaced && !fromBridge
+      ? { text: 'Month view opened.' }
+      : { text: s ? paneMarkdown(s) : SOURCE_LINE }
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {

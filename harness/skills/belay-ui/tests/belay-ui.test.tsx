@@ -196,6 +196,17 @@ describe('the /belay month view', () => {
     expect(out.text ?? '').toContain('○ Annual car insurance (420)')
   })
 
+  test('/belay over Remote Control: the pane opens in the terminal, the phone gets the figures', async ($, on) => {
+    base(on) // the pane can be placed, as when a terminal is attached
+    await start($)
+    const run = (kind: string) => $.command.run({
+      command: 'belay', args: '', origin: { kind } as never,
+      presentation: { isFullscreen: true, columns: 120 } as never,
+    })
+    expect((await run('bridge')).text ?? '').toContain('| eating_out | 77 | 28 | reference |')
+    expect((await run('composer')).text).toBe('Month view opened.')
+  })
+
   test('a receipt after a deterministic script runs, without figures', async ($, on) => {
     const toasts = base(on)
     on('tool.call', () => ({ result: {}, text: 'ok' }) as never)
